@@ -27,7 +27,7 @@ class AuthenticationManager(ConfigurationManager configManager)
     }
 
     // Clear console when auth is successful
-    Console.Clear();
+    if (clear) Console.Clear();
   }
 
   public void EnsurePassphraseCreated()
