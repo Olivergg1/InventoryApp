@@ -6,46 +6,45 @@ namespace InventoryApp.Commands;
 
 public class CommandRegistry
 {
-  private static ImmutableList<Command> Commands = [];
+  private static ImmutableList<CommandCollection> _commandCollections = [];
+  private static ImmutableList<Command> _commands = [];
 
   public static void RegisterCommands() 
   {
-    var commandList = new List<Command>();
-
     // Get all types that inherit from Command
     var commandTypes = Assembly.GetExecutingAssembly()
         .GetTypes()
-        .Where(t => t.IsClass && !t.IsAbstract && typeof(Command).IsAssignableFrom(t))
+        .Where(t => t.IsClass && !t.IsAbstract && typeof(CommandCollection).IsAssignableFrom(t))
         .ToList();
 
-    Commands = commandTypes.Select(t => (Command)Activator.CreateInstance(t)).OrderByDescending(c => c.Priority).ToImmutableList();
+    var commandCollections = commandTypes.Select(t => (CommandCollection)Activator.CreateInstance(t)!).ToImmutableList();
+    _commandCollections = [.. commandCollections.OrderBy(c => c.GetCommandCollectionGroup())];
+
+    _commands = [.. _commandCollections.SelectMany(cc => cc.GetCommands())];
   }
 
   public static bool ExecuteCommand(int index)
   {
     // Check if index is valid
-    if (index < 0 || index > Commands.Count - 1) return false;
+    if (index < 0 || index > _commands.Count - 1) return false;
 
     // Execute command
-    var Command = Commands[index];
+    var Command = _commands[index];
     Command.SystemExecute();
 
     return true;
   }
 
-  public static ImmutableList<Command> GetCommands() => Commands;
+  public static ImmutableList<CommandCollection> GetCommands() => _commandCollections;
 
   public static void ListCommands()
   {
     Console.Clear();
     Console.WriteLine("Available commands: ");
 
-    for(int i = 0; i < Commands.Count; i++)
+    foreach(var (command, i) in _commands.Select((command, index) => (command, index)))
     {
-      var command = Commands[i];
-
       Console.WriteLine($"{i + 1}: {command.GetName()}");
     }
   }
-
 }
