@@ -14,4 +14,6 @@ public class Material
   public string Title { get; set; } = string.Empty;
 
   public List<Order> Orders { get; set; } = [];
+
+  public override string ToString() => Title;
 }
