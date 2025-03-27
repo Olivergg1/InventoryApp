@@ -36,7 +36,7 @@ public class RemoveMaterialCommand : Command
       return;
     }
 
-    // Authorize user
+    // Confirm and authorize user
     _authManager.Auth();
 
     // Cancel removal if material is used in an order
