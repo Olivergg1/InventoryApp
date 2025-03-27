@@ -39,6 +39,13 @@ public class RemoveMaterialCommand : Command
     // Authorize user
     _authManager.Auth();
 
+    // Cancel removal if material is used in an order
+    if (material.Orders.Count > 0) 
+    {
+      LogHelper.Error("Cannot remove material as it is used in an order");
+      return;
+    }
+
     // Save material to database
     _mariaDatabaseContext.Materials.Remove(material);
     _mariaDatabaseContext.SaveChanges();
